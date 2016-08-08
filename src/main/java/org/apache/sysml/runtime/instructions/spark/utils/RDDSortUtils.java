@@ -38,6 +38,7 @@ import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.controlprogram.parfor.stat.InfrastructureAnalyzer;
 import org.apache.sysml.runtime.functionobjects.SortIndex;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBlock;
 import org.apache.sysml.runtime.instructions.spark.data.RowMatrixBlock;
 import org.apache.sysml.runtime.instructions.spark.functions.ReplicateVectorFunction;
@@ -235,10 +236,10 @@ public class RDDSortUtils
 		private static final long serialVersionUID = 6888003502286282876L;
 
 		@Override
-		public Iterable<Double> call(MatrixBlock arg0) 
+		public LazyIterableIterator<Double> call(MatrixBlock arg0) 
 			throws Exception 
 		{
-			return DataConverter.convertToDoubleList(arg0);
+			return (LazyIterableIterator<Double>) DataConverter.convertToDoubleList(arg0).iterator();
 		}		
 	}
 
@@ -250,7 +251,7 @@ public class RDDSortUtils
 		private static final long serialVersionUID = 2132672563825289022L;
 
 		@Override
-		public Iterable<DoublePair> call(Tuple2<MatrixBlock,MatrixBlock> arg0) 
+		public LazyIterableIterator<DoublePair> call(Tuple2<MatrixBlock,MatrixBlock> arg0) 
 			throws Exception 
 		{
 			ArrayList<DoublePair> ret = new ArrayList<DoublePair>(); 
@@ -263,7 +264,7 @@ public class RDDSortUtils
 						mb2.quickGetValue(i, 0)));
 			}
 			
-			return ret;
+			return (LazyIterableIterator<DoublePair>) ret.iterator();
 		}		
 	}
 	
@@ -279,7 +280,7 @@ public class RDDSortUtils
 		}
 		
 		@Override
-		public Iterable<Tuple2<ValueIndexPair,Double>> call(Tuple2<MatrixIndexes,MatrixBlock> arg0) 
+		public LazyIterableIterator<Tuple2<ValueIndexPair,Double>> call(Tuple2<MatrixIndexes,MatrixBlock> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<ValueIndexPair,Double>> ret = new ArrayList<Tuple2<ValueIndexPair,Double>>(); 
@@ -293,7 +294,7 @@ public class RDDSortUtils
 						new ValueIndexPair(val,ixoffset+i+1), val));
 			}
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<ValueIndexPair, Double>>) ret.iterator();
 		}		
 	}
 	
@@ -359,7 +360,7 @@ public class RDDSortUtils
 			_brlen = brlen;
 		}
 		
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<Double,Long>> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<Double,Long>> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -390,7 +391,7 @@ public class RDDSortUtils
 			if( mb!=null && mb.getNonZeros() != 0 )
 				ret.add(new Tuple2<MatrixIndexes,MatrixBlock>(ix,mb));
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 
@@ -410,7 +411,7 @@ public class RDDSortUtils
 			_brlen = brlen;
 		}
 		
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<DoublePair,Long>> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<DoublePair,Long>> arg0) 
 			throws Exception
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -442,7 +443,7 @@ public class RDDSortUtils
 			if( mb!=null && mb.getNonZeros() != 0 )
 				ret.add(new Tuple2<MatrixIndexes,MatrixBlock>(ix,mb));
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	
@@ -462,7 +463,7 @@ public class RDDSortUtils
 			_brlen = brlen;
 		}
 		
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<ValueIndexPair,Long>> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<ValueIndexPair,Long>> arg0) 
 			throws Exception
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -493,7 +494,7 @@ public class RDDSortUtils
 			if( mb!=null && mb.getNonZeros() != 0 )
 				ret.add(new Tuple2<MatrixIndexes,MatrixBlock>(ix,mb));
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	
@@ -513,7 +514,7 @@ public class RDDSortUtils
 			_brlen = brlen;
 		}
 		
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<Long,Long>> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<Long,Long>> arg0) 
 			throws Exception
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -544,7 +545,7 @@ public class RDDSortUtils
 			if( mb!=null && mb.getNonZeros() != 0 )
 				ret.add(new Tuple2<MatrixIndexes,MatrixBlock>(ix,mb));
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	
@@ -562,16 +563,17 @@ public class RDDSortUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, RowMatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, Tuple2<MatrixBlock, MatrixBlock>>> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, RowMatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, Tuple2<MatrixBlock, MatrixBlock>>> arg0)
 			throws Exception 
 		{
-			return new ShuffleMatrixIterator(arg0);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, RowMatrixBlock>>) new ShuffleMatrixIterator(arg0).iterator();
 		}
 		
 		/**
 		 * Lazy iterator to prevent blk output for better resource efficiency; 
 		 * This also lowered garbage collection overhead.
 		 */
+		//private class ShuffleMatrixIterator implements Iterable<Tuple2<MatrixIndexes, RowMatrixBlock>>, Iterator<Tuple2<MatrixIndexes, RowMatrixBlock>>
 		private class ShuffleMatrixIterator implements Iterable<Tuple2<MatrixIndexes, RowMatrixBlock>>, Iterator<Tuple2<MatrixIndexes, RowMatrixBlock>>
 		{
 			private Iterator<Tuple2<MatrixIndexes, Tuple2<MatrixBlock, MatrixBlock>>> _inIter = null;
@@ -651,10 +653,10 @@ public class RDDSortUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, RowMatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, RowMatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
 			throws Exception 
 		{
-			return new ShuffleMatrixIterator(arg0);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, RowMatrixBlock>>) new ShuffleMatrixIterator(arg0).iterator();
 		}
 		
 		/**

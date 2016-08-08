@@ -40,6 +40,7 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import scala.Tuple2;
 
 import org.apache.sysml.runtime.DMLRuntimeException;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.SerLongWritable;
 import org.apache.sysml.runtime.instructions.spark.data.SerText;
 import org.apache.sysml.runtime.io.IOUtilFunctions;
@@ -266,7 +267,7 @@ public class RDDConverterUtils
 		private static final long serialVersionUID = -6590259914203201585L;
 
 		@Override
-		public Iterable<LabeledPoint> call(MatrixBlock arg0) 
+		public LazyIterableIterator<LabeledPoint> call(MatrixBlock arg0) 
 			throws Exception 
 		{
 			ArrayList<LabeledPoint> ret = new ArrayList<LabeledPoint>();
@@ -290,7 +291,7 @@ public class RDDConverterUtils
 				}
 			}
 			
-			return ret;
+			return (LazyIterableIterator<LabeledPoint>) ret.iterator();
 		}
 	}
 	
@@ -351,7 +352,7 @@ public class RDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Text> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Text> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -382,7 +383,7 @@ public class RDDConverterUtils
 			//final flush buffer
 			flushBufferToList(rbuff, ret);
 		
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	
@@ -432,7 +433,7 @@ public class RDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes,MatrixCell>> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes,MatrixCell>> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -459,7 +460,7 @@ public class RDDConverterUtils
 			//final flush buffer
 			flushBufferToList(rbuff, ret);
 		
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	
@@ -538,7 +539,7 @@ public class RDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<Text,Long>> arg0) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<Text,Long>> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<MatrixIndexes,MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes,MatrixBlock>>();
@@ -586,7 +587,7 @@ public class RDDConverterUtils
 			//flush last blocks
 			flushBlocksToList(ix, mb, ret);
 		
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 		
 		// Creates new state of empty column blocks for current global row index.
@@ -631,7 +632,7 @@ public class RDDConverterUtils
 		}
 
 		@Override
-		public Iterable<String> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
+		public LazyIterableIterator<String> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
 			throws Exception 
 		{
 			MatrixIndexes ix = arg0._1();
@@ -664,7 +665,7 @@ public class RDDConverterUtils
 	    		sb.setLength(0); //reset
     		}
 			
-			return ret;
+			return (LazyIterableIterator<String>) ret.iterator();
 		}
 	}
 	
@@ -682,7 +683,7 @@ public class RDDConverterUtils
 		}
 		
 		@Override
-		public Iterable<Tuple2<Long,Tuple2<Long,MatrixBlock>>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
+		public LazyIterableIterator<Tuple2<Long,Tuple2<Long,MatrixBlock>>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<Long,Tuple2<Long,MatrixBlock>>> ret = 
@@ -698,7 +699,7 @@ public class RDDConverterUtils
 						new Tuple2<Long,MatrixBlock>(ix.getColumnIndex(),tmpBlk)));
 			}
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<Long, Tuple2<Long, MatrixBlock>>>) ret.iterator();
 		}
 		
 	}

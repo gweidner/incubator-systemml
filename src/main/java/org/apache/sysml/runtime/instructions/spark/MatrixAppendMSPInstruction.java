@@ -154,7 +154,7 @@ public class MatrixAppendMSPInstruction extends AppendMSPInstruction
 		}
 		
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> kv) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> kv) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<MatrixIndexes, MatrixBlock>> ret = new ArrayList<Tuple2<MatrixIndexes, MatrixBlock>>();
@@ -216,7 +216,7 @@ public class MatrixAppendMSPInstruction extends AppendMSPInstruction
 				ret.addAll(SparkUtils.fromIndexedMatrixBlock(outlist));
 			}
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	
@@ -242,7 +242,7 @@ public class MatrixAppendMSPInstruction extends AppendMSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
 			throws Exception 
 		{
 			return new MapAppendPartitionIterator(arg0);

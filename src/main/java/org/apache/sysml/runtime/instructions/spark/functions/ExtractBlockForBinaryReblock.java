@@ -26,6 +26,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 import org.apache.sysml.runtime.DMLRuntimeException;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
@@ -60,7 +61,7 @@ public class ExtractBlockForBinaryReblock implements PairFlatMapFunction<Tuple2<
 	}
 	
 	@Override
-	public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
+	public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
 		throws Exception 
 	{
 		MatrixIndexes ixIn = arg0._1();
@@ -107,7 +108,7 @@ public class ExtractBlockForBinaryReblock implements PairFlatMapFunction<Tuple2<
 				retVal.add(new Tuple2<MatrixIndexes, MatrixBlock>(indx, blk));
 			}
 		}
-		return retVal;
+		return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) retVal.iterator();
 	}
 	
 	/**

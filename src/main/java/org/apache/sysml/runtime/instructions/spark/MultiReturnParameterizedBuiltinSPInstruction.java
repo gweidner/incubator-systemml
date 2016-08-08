@@ -46,6 +46,7 @@ import org.apache.sysml.runtime.instructions.cp.CPOperand;
 import org.apache.sysml.runtime.instructions.cp.KahanObject;
 import org.apache.sysml.runtime.instructions.spark.ParameterizedBuiltinSPInstruction.RDDTransformApplyFunction;
 import org.apache.sysml.runtime.instructions.spark.ParameterizedBuiltinSPInstruction.RDDTransformApplyOffsetFunction;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.utils.FrameRDDConverterUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.SparkUtils;
 import org.apache.sysml.runtime.io.FrameReader;
@@ -224,7 +225,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 		}
 		
 		@Override
-		public Iterable<Tuple2<Integer, String>> call(Iterator<Tuple2<Long, FrameBlock>> iter)
+		public LazyIterableIterator<Tuple2<Integer, String>> call(Iterator<Tuple2<Long, FrameBlock>> iter)
 			throws Exception 
 		{
 			//build meta data (e.g., recode maps)
@@ -244,7 +245,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 								ret.add(new Tuple2<Integer,String>(e1.getKey(), token));
 					}
 				
-			return ret;
+			return (LazyIterableIterator<Tuple2<Integer, String>>) ret.iterator();
 		}
 	}
 	
@@ -262,7 +263,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 		}
 		
 		@Override
-		public Iterable<String> call(Tuple2<Integer, Iterable<String>> arg0)
+		public LazyIterableIterator<String> call(Tuple2<Integer, Iterable<String>> arg0)
 			throws Exception 
 		{
 			String colID = String.valueOf(arg0._1());
@@ -283,7 +284,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 			}
 			_accMax.add(rowID-1);
 			
-			return ret;
+			return (LazyIterableIterator<String>) ret.iterator();
 		}
 	}
 	
@@ -324,7 +325,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 		}
 		
 		@Override
-		public Iterable<Tuple2<Integer, ColumnMetadata>> call(Iterator<Tuple2<Long, FrameBlock>> iter)
+		public LazyIterableIterator<Tuple2<Integer, ColumnMetadata>> call(Iterator<Tuple2<Long, FrameBlock>> iter)
 			throws Exception 
 		{
 			//build meta data (e.g., histograms and means)
@@ -353,7 +354,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 				}
 			}
 			
-			return ret;
+			return (LazyIterableIterator<Tuple2<Integer, ColumnMetadata>>) ret.iterator();
 		}
 	}
 	
@@ -371,7 +372,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 		}
 
 		@Override
-		public Iterable<String> call(Tuple2<Integer, Iterable<ColumnMetadata>> arg0)
+		public LazyIterableIterator<String> call(Tuple2<Integer, Iterable<ColumnMetadata>> arg0)
 				throws Exception 
 		{
 			int colix = arg0._1();
@@ -413,7 +414,7 @@ public class MultiReturnParameterizedBuiltinSPInstruction extends ComputationSPI
 					ret.add("-2 " + colix + " " + iter.next().getMvValue());
 			}
 			
-			return ret;
+			return (LazyIterableIterator<String>) ret.iterator();
 		}
 	}
 }

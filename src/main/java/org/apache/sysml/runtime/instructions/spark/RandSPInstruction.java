@@ -53,6 +53,7 @@ import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.controlprogram.parfor.stat.InfrastructureAnalyzer;
 import org.apache.sysml.runtime.instructions.InstructionUtils;
 import org.apache.sysml.runtime.instructions.cp.CPOperand;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtils;
 import org.apache.sysml.runtime.io.IOUtilFunctions;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
@@ -646,7 +647,7 @@ public class RandSPInstruction extends UnarySPInstruction
 		}
 		
 		@Override
-		public Iterable<Double> call(SampleTask t)
+		public LazyIterableIterator<Double> call(SampleTask t)
 				throws Exception {
 
 			long st = t.range_start;
@@ -680,7 +681,7 @@ public class RandSPInstruction extends UnarySPInstruction
 							retList.add((double) i);
 				}
 			}
-			return retList;
+			return (LazyIterableIterator<Double>) retList.iterator();
 		}
 	}
 	

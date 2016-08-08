@@ -31,7 +31,8 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.mllib.linalg.DenseVector;
 import org.apache.spark.mllib.linalg.VectorUDT;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
@@ -39,6 +40,7 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.apache.sysml.runtime.DMLRuntimeException;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.functions.GetMLBlock;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
@@ -86,7 +88,7 @@ public class MLOutput {
 	 * @return
 	 * @throws DMLRuntimeException
 	 */
-	public DataFrame getDF(SQLContext sqlContext, String varName) throws DMLRuntimeException {
+	public Dataset<Row> getDF(SQLContext sqlContext, String varName) throws DMLRuntimeException {
 		if(sqlContext == null) {
 			throw new DMLRuntimeException("SQLContext is not created.");
 		}
@@ -106,7 +108,7 @@ public class MLOutput {
 	 * @return
 	 * @throws DMLRuntimeException
 	 */
-	public DataFrame getDF(SQLContext sqlContext, String varName, boolean outputVector) throws DMLRuntimeException {
+	public Dataset getDF(SQLContext sqlContext, String varName, boolean outputVector) throws DMLRuntimeException {
 		if(sqlContext == null) {
 			throw new DMLRuntimeException("SQLContext is not created.");
 		}
@@ -132,7 +134,7 @@ public class MLOutput {
 	 * @return
 	 * @throws DMLRuntimeException
 	 */
-	public DataFrame getDF(SQLContext sqlContext, String varName, Map<String, Tuple2<Long, Long>> range) throws DMLRuntimeException {
+	public Dataset getDF(SQLContext sqlContext, String varName, Map<String, Tuple2<Long, Long>> range) throws DMLRuntimeException {
 		if(sqlContext == null) {
 			throw new DMLRuntimeException("SQLContext is not created.");
 		}
@@ -174,7 +176,7 @@ public class MLOutput {
 		// This will cause infinite recursion due to bug in Spark
 		// https://issues.apache.org/jira/browse/SPARK-6999
 		// return sqlContext.createDataFrame(rowsRDD, colNames); // where ArrayList<String> colNames
-		return sqlContext.createDataFrame(rowsRDD.rdd(), DataTypes.createStructType(fields));
+		return sqlContext.createDataFrame(rowsRDD.rdd(), DataTypes.createStructType(fields)).as(Encoders.bean(Row.class));
 		
 	}
 	
@@ -201,7 +203,7 @@ public class MLOutput {
 		if(rdd != null) {
 			MatrixCharacteristics mc = getMatrixCharacteristics(varName);
 			StructType schema = MLBlock.getDefaultSchemaForBinaryBlock();
-			return new MLMatrix(sqlContext.createDataFrame(rdd.map(new GetMLBlock()).rdd(), schema), mc, ml);
+			return new MLMatrix(sqlContext.createDataFrame(rdd.map(new GetMLBlock()).rdd(), schema).as(Encoders.bean(Row.class)), mc, ml);
 		}
 		throw new DMLRuntimeException("Variable " + varName + " not found in the output symbol table.");
 	}
@@ -227,7 +229,7 @@ public class MLOutput {
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, Tuple2<Long, Double[]>>> call(Tuple2<MatrixIndexes, MatrixBlock> kv) throws Exception {
+		public LazyIterableIterator<Tuple2<Long, Tuple2<Long, Double[]>>> call(Tuple2<MatrixIndexes, MatrixBlock> kv) throws Exception {
 			// ------------------------------------------------------------------
     		//	Compute local block size: 
     		// Example: For matrix: 1500 X 1100 with block length 1000 X 1000
@@ -248,7 +250,7 @@ public class MLOutput {
 				}
 				retVal.add(new Tuple2<Long, Tuple2<Long,Double[]>>(startRowIndex + i, new Tuple2<Long,Double[]>(kv._1.getColumnIndex(), partialRow)));
 			}
-			return retVal;
+			return (LazyIterableIterator<Tuple2<Long, Tuple2<Long, Double[]>>>) retVal.iterator();
 		}
 	}
 	

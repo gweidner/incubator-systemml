@@ -173,8 +173,10 @@ public class SparkListener extends RDDOperationGraphListener {
 		synchronized(currentInstructions) {
 			if(stageTaskMapping.containsKey(stageID)) {
 				Option<String> errorMessage = Option.apply(null); // TODO
-				TaskUIData taskData = new TaskUIData(taskEnd.taskInfo(), Option.apply(taskEnd.taskMetrics()), errorMessage);
-				stageTaskMapping.get(stageID).add(taskData);
+				//TaskUIData taskData = new TaskUIData(taskEnd.taskInfo(), Option.apply(taskEnd.taskMetrics()), errorMessage);
+				// *** HACK ALERT *** HACK ALERT *** HACK ALERT ***
+				//TaskUIData taskData = new TaskUIData(taskEnd.taskInfo(), null);
+				//stageTaskMapping.get(stageID).add(taskData);
 			}
 			else {
 				// TODO: throw exception

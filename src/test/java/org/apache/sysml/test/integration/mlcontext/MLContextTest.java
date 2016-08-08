@@ -47,7 +47,8 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
@@ -513,7 +514,7 @@ public class MLContextTest extends AutomatedTestBase {
 		fields.add(DataTypes.createStructField("C2", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("C3", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
-		DataFrame dataFrame = sqlContext.createDataFrame(javaRddRow, schema);
+		Dataset<Row> dataFrame = sqlContext.createDataFrame(javaRddRow, schema).as(Encoders.bean(Row.class));
 
 		Script script = dml("print('sum: ' + sum(M));").in("M", dataFrame);
 		setExpectedStdOut("sum: 450.0");
@@ -537,7 +538,7 @@ public class MLContextTest extends AutomatedTestBase {
 		fields.add(DataTypes.createStructField("C2", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("C3", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
-		DataFrame dataFrame = sqlContext.createDataFrame(javaRddRow, schema);
+		Dataset<Row> dataFrame = sqlContext.createDataFrame(javaRddRow, schema).as(Encoders.bean(Row.class));
 
 		Script script = pydml("print('sum: ' + sum(M))").in("M", dataFrame);
 		setExpectedStdOut("sum: 450.0");
@@ -998,7 +999,7 @@ public class MLContextTest extends AutomatedTestBase {
 		String s = "M = matrix('1 2 3 4', rows=2, cols=2);";
 		Script script = dml(s).out("M");
 		MLResults results = ml.execute(script);
-		DataFrame dataFrame = results.getDataFrame("M");
+		Dataset<Row> dataFrame = results.getDataFrame("M");
 		List<Row> list = dataFrame.collectAsList();
 		Row row1 = list.get(0);
 		Assert.assertEquals(0.0, row1.getDouble(0), 0.0);
@@ -1018,7 +1019,7 @@ public class MLContextTest extends AutomatedTestBase {
 		String s = "M = full('1 2 3 4', rows=2, cols=2)";
 		Script script = pydml(s).out("M");
 		MLResults results = ml.execute(script);
-		DataFrame dataFrame = results.getDataFrame("M");
+		Dataset<Row> dataFrame = results.getDataFrame("M");
 		List<Row> list = dataFrame.collectAsList();
 		Row row1 = list.get(0);
 		Assert.assertEquals(0.0, row1.getDouble(0), 0.0);
@@ -1190,7 +1191,7 @@ public class MLContextTest extends AutomatedTestBase {
 		fields.add(DataTypes.createStructField("C2", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("C3", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
-		DataFrame dataFrame = sqlContext.createDataFrame(javaRddRow, schema);
+		Dataset<Row> dataFrame = sqlContext.createDataFrame(javaRddRow, schema).as(Encoders.bean(Row.class));
 
 		BinaryBlockMatrix binaryBlockMatrix = new BinaryBlockMatrix(dataFrame);
 		Script script = dml("avg = avg(M);").in("M", binaryBlockMatrix).out("avg");
@@ -1215,7 +1216,7 @@ public class MLContextTest extends AutomatedTestBase {
 		fields.add(DataTypes.createStructField("C2", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("C3", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
-		DataFrame dataFrame = sqlContext.createDataFrame(javaRddRow, schema);
+		Dataset<Row> dataFrame = sqlContext.createDataFrame(javaRddRow, schema).as(Encoders.bean(Row.class));
 
 		BinaryBlockMatrix binaryBlockMatrix = new BinaryBlockMatrix(dataFrame);
 		Script script = pydml("avg = avg(M)").in("M", binaryBlockMatrix).out("avg");
@@ -1484,7 +1485,7 @@ public class MLContextTest extends AutomatedTestBase {
 		fields.add(DataTypes.createStructField("C2", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("C3", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
-		DataFrame dataFrame = sqlContext.createDataFrame(javaRddRow, schema);
+		Dataset<Row> dataFrame = sqlContext.createDataFrame(javaRddRow, schema).as(Encoders.bean(Row.class));
 
 		MatrixMetadata mm = new MatrixMetadata(3, 3, 9);
 
@@ -1510,7 +1511,7 @@ public class MLContextTest extends AutomatedTestBase {
 		fields.add(DataTypes.createStructField("C2", DataTypes.StringType, true));
 		fields.add(DataTypes.createStructField("C3", DataTypes.StringType, true));
 		StructType schema = DataTypes.createStructType(fields);
-		DataFrame dataFrame = sqlContext.createDataFrame(javaRddRow, schema);
+		Dataset<Row> dataFrame = sqlContext.createDataFrame(javaRddRow, schema).as(Encoders.bean(Row.class));
 
 		MatrixMetadata mm = new MatrixMetadata(3, 3, 9);
 

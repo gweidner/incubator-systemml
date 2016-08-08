@@ -25,6 +25,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 
 import scala.Tuple2;
 
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
 
@@ -44,7 +45,7 @@ public class ReplicateVectorFunction implements PairFlatMapFunction<Tuple2<Matri
 	}
 	
 	@Override
-	public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
+	public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
 		throws Exception 
 	{
 		MatrixIndexes ix = arg0._1();
@@ -66,6 +67,6 @@ public class ReplicateVectorFunction implements PairFlatMapFunction<Tuple2<Matri
 				retVal.add(new Tuple2<MatrixIndexes, MatrixBlock>(new MatrixIndexes(ix.getRowIndex(), i), mb));
 		}
 		
-		return retVal;
+		return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) retVal.iterator();
 	}
 }

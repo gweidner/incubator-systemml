@@ -32,6 +32,7 @@ import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
 import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.instructions.InstructionUtils;
 import org.apache.sysml.runtime.instructions.cp.CPOperand;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.SparkUtils;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
@@ -136,7 +137,7 @@ public class MatrixReshapeSPInstruction extends UnarySPInstruction
 		}
 		
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call( Tuple2<MatrixIndexes, MatrixBlock> arg0 ) 
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call( Tuple2<MatrixIndexes, MatrixBlock> arg0 ) 
 			throws Exception 
 		{
 			//input conversion (for libmatrixreorg compatibility)
@@ -148,7 +149,7 @@ public class MatrixReshapeSPInstruction extends UnarySPInstruction
                     out, _mcOut.getRows(), _mcOut.getCols(), _mcOut.getRowsPerBlock(), _mcOut.getColsPerBlock(), _byrow);
 
 			//output conversion (for compatibility w/ rdd schema)
-			return SparkUtils.fromIndexedMatrixBlock(out);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) SparkUtils.fromIndexedMatrixBlock(out).iterator();
 		}
 	}
 }

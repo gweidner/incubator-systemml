@@ -24,6 +24,7 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 
 import scala.Tuple2;
 
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
 import org.apache.sysml.runtime.matrix.data.BinaryBlockToTextCellConverter;
@@ -39,12 +40,12 @@ public class ConvertMatrixBlockToIJVLines implements FlatMapFunction<Tuple2<Matr
 	}
 	
 	@Override
-	public Iterable<String> call(Tuple2<MatrixIndexes, MatrixBlock> kv) throws Exception {
+	public LazyIterableIterator<String> call(Tuple2<MatrixIndexes, MatrixBlock> kv) throws Exception {
 		final BinaryBlockToTextCellConverter converter = new BinaryBlockToTextCellConverter();
 		converter.setBlockSize(brlen, bclen);
 		converter.convert(kv._1, kv._2);
 		
-		return new Iterable<String>() {
+		Iterable<String> ret = new Iterable<String>() {
 			@Override
 			public Iterator<String> iterator() {
 				return new Iterator<String>() {
@@ -64,6 +65,8 @@ public class ConvertMatrixBlockToIJVLines implements FlatMapFunction<Tuple2<Matr
 				};
 			}
 		};
+		
+		return (LazyIterableIterator<String>) ret.iterator();
 	}
 
 }

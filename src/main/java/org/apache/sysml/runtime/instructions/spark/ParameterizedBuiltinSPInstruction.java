@@ -47,6 +47,7 @@ import org.apache.sysml.runtime.functionobjects.ValueFunction;
 import org.apache.sysml.runtime.instructions.InstructionUtils;
 import org.apache.sysml.runtime.instructions.cp.CPOperand;
 import org.apache.sysml.runtime.instructions.mr.GroupedAggregateInstruction;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
 import org.apache.sysml.runtime.instructions.spark.functions.ExtractGroup.ExtractGroupBroadcast;
 import org.apache.sysml.runtime.instructions.spark.functions.ExtractGroup.ExtractGroupJoin;
@@ -533,7 +534,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, Tuple2<MatrixBlock, MatrixBlock>> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, Tuple2<MatrixBlock, MatrixBlock>> arg0)
 			throws Exception 
 		{
 			//prepare inputs (for internal api compatibility)
@@ -545,7 +546,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 			LibMatrixReorg.rmempty(data, offsets, _rmRows, _len, _brlen, _bclen, out);
 
 			//prepare and return outputs
-			return SparkUtils.fromIndexedMatrixBlock(out);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) SparkUtils.fromIndexedMatrixBlock(out).iterator();
 		}
 	}
 	
@@ -573,7 +574,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
 			throws Exception 
 		{
 			//prepare inputs (for internal api compatibility)
@@ -590,7 +591,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 			LibMatrixReorg.rmempty(data, offsets, _rmRows, _len, _brlen, _bclen, out);
 
 			//prepare and return outputs
-			return SparkUtils.fromIndexedMatrixBlock(out);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) SparkUtils.fromIndexedMatrixBlock(out).iterator();
 		}
 	}
 	
@@ -619,7 +620,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
 			throws Exception 
 		{
 			//prepare inputs (for internal api compatibility)
@@ -630,7 +631,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 			LibMatrixReorg.rexpand(data, _maxVal, _dirRows, _cast, _ignore, _brlen, _bclen, out);
 			
 			//prepare and return outputs
-			return SparkUtils.fromIndexedMatrixBlock(out);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) SparkUtils.fromIndexedMatrixBlock(out).iterator();
 		}
 	}
 	
@@ -654,7 +655,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0)
 			throws Exception 
 		{
 			//get all inputs
@@ -668,7 +669,7 @@ public class ParameterizedBuiltinSPInstruction  extends ComputationSPInstruction
 			OperationsOnMatrixValues.performMapGroupedAggregate(_op, in1, groups, _ngroups, _brlen, _bclen, outlist);
 			
 			//output all result blocks
-			return SparkUtils.fromIndexedMatrixBlock(outlist);
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) SparkUtils.fromIndexedMatrixBlock(outlist).iterator();
 		}
 	}
 	

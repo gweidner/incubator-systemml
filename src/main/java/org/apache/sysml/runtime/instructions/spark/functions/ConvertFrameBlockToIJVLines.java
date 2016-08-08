@@ -25,6 +25,7 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 
 import scala.Tuple2;
 
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.matrix.data.FrameBlock;
 
 public class ConvertFrameBlockToIJVLines implements FlatMapFunction<Tuple2<Long,FrameBlock>, String> 
@@ -32,7 +33,7 @@ public class ConvertFrameBlockToIJVLines implements FlatMapFunction<Tuple2<Long,
 	private static final long serialVersionUID = 1803516615963340115L;
 
 	@Override
-	public Iterable<String> call(Tuple2<Long, FrameBlock> kv) 
+	public LazyIterableIterator<String> call(Tuple2<Long, FrameBlock> kv) 
 		throws Exception 
 	{
 		long rowoffset = kv._1;
@@ -68,6 +69,6 @@ public class ConvertFrameBlockToIJVLines implements FlatMapFunction<Tuple2<Long,
 			}
 		}
 		
-		return cells;
+		return (LazyIterableIterator<String>) cells.iterator();
 	}
 }

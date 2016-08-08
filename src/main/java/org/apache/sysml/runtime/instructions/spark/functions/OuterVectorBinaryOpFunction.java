@@ -25,6 +25,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 
 import scala.Tuple2;
 
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
@@ -44,10 +45,10 @@ public class OuterVectorBinaryOpFunction implements PairFlatMapFunction<Tuple2<M
 	}
 
 	@Override
-	public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
+	public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> arg0) 
 		throws Exception 
 	{
-		return new OuterVectorBinaryOpIterator(arg0);
+		return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) new OuterVectorBinaryOpIterator(arg0).iterator();
 	}
 
 	/**

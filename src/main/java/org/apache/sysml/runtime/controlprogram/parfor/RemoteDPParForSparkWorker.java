@@ -27,7 +27,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.spark.Accumulator;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-
 import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.controlprogram.ParForProgramBlock.PDataPartitionFormat;
 import org.apache.sysml.runtime.controlprogram.caching.CacheableData;
@@ -37,6 +36,7 @@ import org.apache.sysml.runtime.controlprogram.parfor.util.IDHandler;
 import org.apache.sysml.runtime.controlprogram.parfor.util.PairWritableBlock;
 import org.apache.sysml.runtime.controlprogram.parfor.util.PairWritableCell;
 import org.apache.sysml.runtime.instructions.cp.IntObject;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.OutputInfo;
@@ -97,7 +97,7 @@ public class RemoteDPParForSparkWorker extends ParWorker implements PairFlatMapF
 	}
 	
 	@Override 
-	public Iterable<Tuple2<Long, String>> call(Iterator<Tuple2<Long, Iterable<Writable>>> arg0)
+	public LazyIterableIterator<Tuple2<Long, String>> call(Iterator<Tuple2<Long, Iterable<Writable>>> arg0)
 		throws Exception 
 	{
 		ArrayList<Tuple2<Long,String>> ret = new ArrayList<Tuple2<Long,String>>();
@@ -140,7 +140,7 @@ public class RemoteDPParForSparkWorker extends ParWorker implements PairFlatMapF
 				ret.add(new Tuple2<Long,String>(_workerID, val));
 		}	
 		
-		return ret;
+		return (LazyIterableIterator<Tuple2<Long, String>>) ret.iterator();
 	}
 	
 	/**

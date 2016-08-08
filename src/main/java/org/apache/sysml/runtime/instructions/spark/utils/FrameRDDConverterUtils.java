@@ -22,6 +22,7 @@ package org.apache.sysml.runtime.instructions.spark.utils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +37,8 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
@@ -49,6 +51,7 @@ import scala.Tuple2;
 import org.apache.sysml.parser.Expression.ValueType;
 import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.controlprogram.caching.MatrixObject.UpdateType;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.SerLongWritable;
 import org.apache.sysml.runtime.instructions.spark.data.SerText;
 import org.apache.sysml.runtime.instructions.spark.functions.ConvertFrameBlockToIJVLines;
@@ -322,22 +325,23 @@ public class FrameRDDConverterUtils
 	 * @throws DMLRuntimeException
 	 */
 	public static JavaPairRDD<Long, FrameBlock> dataFrameToBinaryBlock(JavaSparkContext sc,
-			DataFrame df, MatrixCharacteristics mcOut, boolean containsID) 
+			Dataset<Row> df, MatrixCharacteristics mcOut, boolean containsID) 
 		throws DMLRuntimeException 
 	{
 		
 		if(containsID)
-			df = df.drop("ID");
+			df = df.toDF().drop("ID").as(Encoders.bean(Row.class));
+
 		
 		//determine unknown dimensions if required
 		if( !mcOut.dimsKnown(true) ) {
-			JavaRDD<Row> tmp = df.javaRDD();
+			JavaRDD<Row> tmp = df.toDF().javaRDD();
 			long rlen = tmp.count();
-			long clen = containsID ? (df.columns().length - 1) : df.columns().length;
+			long clen = containsID ? (df.toDF().columns().length - 1) : df.toDF().columns().length;
 			mcOut.set(rlen, clen, mcOut.getRowsPerBlock(), mcOut.getColsPerBlock(), -1);
 		}
 		
-		JavaPairRDD<Row, Long> prepinput = df.javaRDD()
+		JavaPairRDD<Row, Long> prepinput = df.toDF().javaRDD()
 				.zipWithIndex(); //zip row index
 		
 		//convert rdd to binary block rdd
@@ -355,7 +359,7 @@ public class FrameRDDConverterUtils
 	 * @param strict
 	 * @return
 	 */
-	public static DataFrame binaryBlockToDataFrame(JavaPairRDD<Long,FrameBlock> in, MatrixCharacteristics mcIn, JavaSparkContext sc)
+	public static Dataset<Row> binaryBlockToDataFrame(JavaPairRDD<Long,FrameBlock> in, MatrixCharacteristics mcIn, JavaSparkContext sc)
 	{
 		List<ValueType> schema = in.first()._2().getSchema();
 		
@@ -364,7 +368,7 @@ public class FrameRDDConverterUtils
 				
 		SQLContext sqlContext = new SQLContext(sc);
 		StructType dfSchema = UtilFunctions.convertFrameSchemaToDFSchema(schema);
-		DataFrame df = sqlContext.createDataFrame(rowRDD, dfSchema);
+		Dataset<Row> df = sqlContext.createDataFrame(rowRDD, dfSchema).as(Encoders.bean(Row.class));
 	
 		return df;
 	}
@@ -481,7 +485,7 @@ public class FrameRDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Text,Long>> arg0) 
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Text,Long>> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<Long,FrameBlock>> ret = new ArrayList<Tuple2<Long,FrameBlock>>();
@@ -531,7 +535,7 @@ public class FrameRDDConverterUtils
 			//flush last blocks
 			flushBlocksToList(ix, mb, ret);
 		
-			return ret;
+			return (LazyIterableIterator<Tuple2<Long, FrameBlock>>) ret.iterator();
 		}
 		
 		// Creates new state of empty column blocks for current global row index.
@@ -565,7 +569,7 @@ public class FrameRDDConverterUtils
 		}
 
 		@Override
-		public Iterable<String> call(Tuple2<Long, FrameBlock> arg0)
+		public LazyIterableIterator<String> call(Tuple2<Long, FrameBlock> arg0)
 			throws Exception 
 		{
 			Long ix = arg0._1();
@@ -612,7 +616,7 @@ public class FrameRDDConverterUtils
 				sb.setLength(0); //reset
 			}
 			
-			return ret;
+			return (LazyIterableIterator<String>) ret.iterator();
 		}
 	}
 	
@@ -632,7 +636,7 @@ public class FrameRDDConverterUtils
 		}
 		
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Row, Long>> arg0) throws Exception {
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Row, Long>> arg0) throws Exception {
 			ArrayList<Tuple2<Long,FrameBlock>> ret = new ArrayList<Tuple2<Long,FrameBlock>>();
 
 			Long[] ix = new Long[1];
@@ -661,7 +665,7 @@ public class FrameRDDConverterUtils
 			//flush last blocks
 			flushBlocksToList(ix, mb, ret);
 		
-			return ret;
+			return (LazyIterableIterator<Tuple2<Long, FrameBlock>>) ret.iterator();
 		}
 		
 		public Object[] rowToObjectArray(Row row, int _clen, List<ValueType> schema) throws Exception {
@@ -705,7 +709,7 @@ public class FrameRDDConverterUtils
 		private static final long serialVersionUID = 8093340778966667460L;
 		
 		@Override
-		public Iterable<Row> call(Tuple2<Long, FrameBlock> arg0)
+		public LazyIterableIterator<Row> call(Tuple2<Long, FrameBlock> arg0)
 			throws Exception 
 		{
 			FrameBlock blk = arg0._2();
@@ -716,7 +720,7 @@ public class FrameRDDConverterUtils
 			while( iter.hasNext() )
 				ret.add(RowFactory.create(iter.next().clone()));
 				
-			return ret;
+			return (LazyIterableIterator<Row>) ret.iterator();
 		}
 	}
 	
@@ -754,7 +758,7 @@ public class FrameRDDConverterUtils
 			//temporary list of indexed matrix values to prevent library dependencies
 			ArrayList<Pair<Long, FrameBlock>> rettmp = new ArrayList<Pair<Long, FrameBlock>>();
 			rbuff.flushBufferToBinaryBlocks(rettmp);
-			ret.addAll(SparkUtils.fromIndexedFrameBlock(rettmp));
+			ret.addAll((Collection<? extends Tuple2<Long, FrameBlock>>) SparkUtils.fromIndexedFrameBlock(rettmp));
 		}
 	}
 	
@@ -773,7 +777,7 @@ public class FrameRDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Iterator<Text> arg0) 
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Iterator<Text> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<Long,FrameBlock>> ret = new ArrayList<Tuple2<Long,FrameBlock>>();
@@ -804,7 +808,7 @@ public class FrameRDDConverterUtils
 			//final flush buffer
 			flushBufferToList(rbuff, ret);
 		
-			return ret;
+			return (LazyIterableIterator<Tuple2<Long, FrameBlock>>) ret.iterator();
 		}
 	}
 	
@@ -828,7 +832,7 @@ public class FrameRDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Tuple2<MatrixIndexes,MatrixBlock> arg0) 
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Tuple2<MatrixIndexes,MatrixBlock> arg0) 
 			throws Exception 
 		{
 			ArrayList<Tuple2<Long,FrameBlock>> ret = new ArrayList<Tuple2<Long,FrameBlock>>();
@@ -873,7 +877,7 @@ public class FrameRDDConverterUtils
 				}
 				iRowLow = iRowHigh+1;
 			}
-			return ret;
+			return (LazyIterableIterator<Tuple2<Long, FrameBlock>>) ret.iterator();
 		}
 	}
 
@@ -931,7 +935,7 @@ public class FrameRDDConverterUtils
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<Long, FrameBlock> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<Long, FrameBlock> arg0)
 			throws Exception 
 		{
 			long rowIndex = arg0._1();
@@ -967,7 +971,7 @@ public class FrameRDDConverterUtils
 				}
 			}
 
-			return ret;
+			return (LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>>) ret.iterator();
 		}
 	}
 	

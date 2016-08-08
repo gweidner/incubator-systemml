@@ -222,7 +222,7 @@ public class FrameIndexingSPInstruction  extends IndexingSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Tuple2<Long, FrameBlock> rightKV) 
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Tuple2<Long, FrameBlock> rightKV) 
 			throws Exception 
 		{
 			Pair<Long,FrameBlock> in = SparkUtils.toIndexedFrameBlock(rightKV);			
@@ -254,7 +254,7 @@ public class FrameIndexingSPInstruction  extends IndexingSPInstruction
 		}
 		
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Tuple2<Long, FrameBlock> kv) 
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Tuple2<Long, FrameBlock> kv) 
 			throws Exception 
 		{
 			ArrayList<Pair<Long,FrameBlock>> out = new ArrayList<Pair<Long,FrameBlock>>();
@@ -307,7 +307,7 @@ public class FrameIndexingSPInstruction  extends IndexingSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Long, FrameBlock>> arg0)
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Long, FrameBlock>> arg0)
 			throws Exception 
 		{
 			return new LeftIndexPartitionIterator(arg0);
@@ -389,7 +389,7 @@ public class FrameIndexingSPInstruction  extends IndexingSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Tuple2<Long, FrameBlock> kv) 
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Tuple2<Long, FrameBlock> kv) 
 			throws Exception 
 		{	
 			Pair<Long, FrameBlock> in = SparkUtils.toIndexedFrameBlock(kv);
@@ -419,7 +419,7 @@ public class FrameIndexingSPInstruction  extends IndexingSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Long, FrameBlock>> arg0)
+		public LazyIterableIterator<Tuple2<Long, FrameBlock>> call(Iterator<Tuple2<Long, FrameBlock>> arg0)
 			throws Exception 
 		{
 			return new SliceBlockPartitionIterator(arg0);

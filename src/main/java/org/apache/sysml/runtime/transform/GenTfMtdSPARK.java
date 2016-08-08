@@ -41,6 +41,7 @@ import org.apache.wink.json4j.JSONObject;
 import scala.Tuple2;
 
 import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.matrix.CSVReblockMR.OffsetCount;
 import org.apache.sysml.runtime.matrix.data.CSVFileFormatProperties;
 import org.apache.sysml.runtime.matrix.data.Pair;
@@ -161,7 +162,7 @@ public class GenTfMtdSPARK
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Iterable<Long> call(Tuple2<Integer, Iterable<DistinctValue>> t)
+		public LazyIterableIterator<Long> call(Tuple2<Integer, Iterable<DistinctValue>> t)
 				throws Exception {
 			
 			int colID = t._1();
@@ -210,7 +211,7 @@ public class GenTfMtdSPARK
 				numRows.add(0L);
 			}
 			
-			return numRows;
+			return (LazyIterableIterator<Long>) numRows.iterator();
 		}
 	}
 	

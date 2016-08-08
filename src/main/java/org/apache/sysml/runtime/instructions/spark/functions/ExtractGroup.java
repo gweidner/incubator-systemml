@@ -27,6 +27,7 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 import org.apache.sysml.hops.OptimizerUtils;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
@@ -57,7 +58,7 @@ public abstract class ExtractGroup implements Serializable
 	 * @return
 	 * @throws Exception 
 	 */
-	protected Iterable<Tuple2<MatrixIndexes, WeightedCell>> execute(MatrixIndexes ix, MatrixBlock group, MatrixBlock target) throws Exception
+	protected LazyIterableIterator<Tuple2<MatrixIndexes, WeightedCell>> execute(MatrixIndexes ix, MatrixBlock group, MatrixBlock target) throws Exception
 	{
 		//sanity check matching block dimensions
 		if(group.getNumRows() != target.getNumRows()) {
@@ -105,7 +106,7 @@ public abstract class ExtractGroup implements Serializable
 			}
 		}
 		
-		return groupValuePairs;	
+		return (LazyIterableIterator<Tuple2<MatrixIndexes, WeightedCell>>) groupValuePairs.iterator();	
 	}
 	
 	/**
@@ -120,7 +121,7 @@ public abstract class ExtractGroup implements Serializable
 		}
 		
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, WeightedCell>> call(
+		public LazyIterableIterator<Tuple2<MatrixIndexes, WeightedCell>> call(
 				Tuple2<MatrixIndexes, Tuple2<MatrixBlock, MatrixBlock>> arg)
 				throws Exception 
 		{
@@ -147,7 +148,7 @@ public abstract class ExtractGroup implements Serializable
 		}
 		
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, WeightedCell>> call(
+		public LazyIterableIterator<Tuple2<MatrixIndexes, WeightedCell>> call(
 				Tuple2<MatrixIndexes, MatrixBlock> arg)
 				throws Exception 
 		{

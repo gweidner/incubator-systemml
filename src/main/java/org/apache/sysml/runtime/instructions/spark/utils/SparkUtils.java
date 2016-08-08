@@ -34,6 +34,7 @@ import scala.Tuple2;
 
 import org.apache.sysml.lops.Checkpoint;
 import org.apache.sysml.runtime.DMLRuntimeException;
+import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.functions.CopyBinaryCellFunction;
 import org.apache.sysml.runtime.instructions.spark.functions.CopyBlockFunction;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
@@ -130,13 +131,14 @@ public class SparkUtils
 	 * @param in
 	 * @return
 	 */
-	public static ArrayList<Tuple2<Long,FrameBlock>> fromIndexedFrameBlock( ArrayList<Pair<Long, FrameBlock>> in )
+	//public static ArrayList<Tuple2<Long,FrameBlock>> fromIndexedFrameBlock( ArrayList<Pair<Long, FrameBlock>> in )
+	public static LazyIterableIterator<Tuple2<Long,FrameBlock>> fromIndexedFrameBlock( ArrayList<Pair<Long, FrameBlock>> in )
 	{
 		ArrayList<Tuple2<Long, FrameBlock>> ret = new ArrayList<Tuple2<Long, FrameBlock>>();
 		for( Pair<Long, FrameBlock> ifv : in )
 			ret.add(fromIndexedFrameBlock(ifv));
 		
-		return ret;
+		return (LazyIterableIterator<Tuple2<Long, FrameBlock>>) ret.iterator();
 	}
 	
 	/**
