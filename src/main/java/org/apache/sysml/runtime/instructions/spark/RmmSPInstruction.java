@@ -20,10 +20,7 @@
 package org.apache.sysml.runtime.instructions.spark;
 
 
-import java.util.LinkedList;
-
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 
 import scala.Tuple2;
@@ -35,6 +32,7 @@ import org.apache.sysml.runtime.functionobjects.Multiply;
 import org.apache.sysml.runtime.functionobjects.Plus;
 import org.apache.sysml.runtime.instructions.InstructionUtils;
 import org.apache.sysml.runtime.instructions.cp.CPOperand;
+import org.apache.sysml.runtime.instructions.spark.RmmSPInstructionComp.RmmReplicateFunction;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
@@ -110,63 +108,6 @@ public class RmmSPInstruction extends BinarySPInstruction
 		sec.setRDDHandleForVariable(output.getName(), out);
 		sec.addLineageRDD(output.getName(), input1.getName());
 		sec.addLineageRDD(output.getName(), input2.getName());
-	}
-
-
-	/**
-	 * 
-	 */
-	private static class RmmReplicateFunction implements PairFlatMapFunction<Tuple2<MatrixIndexes, MatrixBlock>, TripleIndexes, MatrixBlock> 
-	{
-		private static final long serialVersionUID = 3577072668341033932L;
-		
-		private long _len = -1;
-		private long _blen = -1;
-		private boolean _left = false;
-		
-		public RmmReplicateFunction(long len, long blen, boolean left)
-		{
-			_len = len;
-			_blen = blen;
-			_left = left;
-		}
-		
-		@Override
-		public Iterable<Tuple2<TripleIndexes, MatrixBlock>> call( Tuple2<MatrixIndexes, MatrixBlock> arg0 ) 
-			throws Exception 
-		{
-			LinkedList<Tuple2<TripleIndexes, MatrixBlock>> ret = new LinkedList<Tuple2<TripleIndexes, MatrixBlock>>();
-			MatrixIndexes ixIn = arg0._1();
-			MatrixBlock blkIn = arg0._2();
-			
-			long numBlocks = (long) Math.ceil((double)_len/_blen); 
-			
-			if( _left ) //LHS MATRIX
-			{
-				//replicate wrt # column blocks in RHS
-				long i = ixIn.getRowIndex();
-				long k = ixIn.getColumnIndex();
-				for( long j=1; j<=numBlocks; j++ ) {
-					TripleIndexes tmptix = new TripleIndexes(i, j, k);
-					MatrixBlock tmpblk = new MatrixBlock(blkIn);
-					ret.add( new Tuple2<TripleIndexes, MatrixBlock>(tmptix, tmpblk) );
-				}
-			} 
-			else // RHS MATRIX
-			{
-				//replicate wrt # row blocks in LHS
-				long k = ixIn.getRowIndex();
-				long j = ixIn.getColumnIndex();
-				for( long i=1; i<=numBlocks; i++ ) {
-					TripleIndexes tmptix = new TripleIndexes(i, j, k);
-					MatrixBlock tmpblk = new MatrixBlock(blkIn);
-					ret.add( new Tuple2<TripleIndexes, MatrixBlock>(tmptix, tmpblk) );
-				}
-			}
-			
-			//output list of new tuples
-			return ret;
-		}
 	}
 
 	/**

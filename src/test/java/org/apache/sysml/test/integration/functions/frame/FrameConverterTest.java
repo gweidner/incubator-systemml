@@ -31,7 +31,7 @@ import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
@@ -46,6 +46,7 @@ import org.apache.sysml.runtime.instructions.spark.functions.CopyFrameBlockPairF
 import org.apache.sysml.runtime.instructions.spark.utils.FrameRDDConverterUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.FrameRDDConverterUtils.LongFrameToLongWritableFrameFunction;
 import org.apache.sysml.runtime.instructions.spark.utils.FrameRDDConverterUtils.LongWritableFrameToLongFrameFunction;
+import org.apache.sysml.runtime.instructions.spark.utils.FrameRDDConverterUtilsComp;
 import org.apache.sysml.runtime.io.FrameReader;
 import org.apache.sysml.runtime.io.FrameReaderFactory;
 import org.apache.sysml.runtime.io.FrameWriter;
@@ -522,10 +523,10 @@ public class FrameConverterTest extends AutomatedTestBase
 				//Create DataFrame 
 				SQLContext sqlContext = new SQLContext(sc);
 				StructType dfSchema = UtilFunctions.convertFrameSchemaToDFSchema(schema);
-				JavaRDD<Row> rowRDD = getRowRDD(sc, fnameIn, separator);
-				DataFrame df = sqlContext.createDataFrame(rowRDD, dfSchema);
+				JavaRDD<Row> rowRDD = getRowRDD(sc, fnameIn, separator, schema);
+				Dataset<Row> df = sqlContext.createDataFrame(rowRDD, dfSchema);
 				
-				JavaPairRDD<LongWritable, FrameBlock> rddOut = FrameRDDConverterUtils
+				JavaPairRDD<LongWritable, FrameBlock> rddOut = FrameRDDConverterUtilsComp
 						.dataFrameToBinaryBlock(sc, df, mc, false/*, columns*/)
 						.mapToPair(new LongFrameToLongWritableFrameFunction());
 				rddOut.saveAsHadoopFile(fnameOut, LongWritable.class, FrameBlock.class, oinfo.outputFormatClass);
@@ -536,10 +537,10 @@ public class FrameConverterTest extends AutomatedTestBase
 				OutputInfo oinfo = OutputInfo.BinaryBlockOutputInfo;
 				JavaPairRDD<LongWritable, FrameBlock> rddIn = sc.hadoopFile(fnameIn, iinfo.inputFormatClass, LongWritable.class, FrameBlock.class);
 				JavaPairRDD<Long, FrameBlock> rddIn2 = rddIn.mapToPair(new LongWritableFrameToLongFrameFunction());
-				DataFrame df = FrameRDDConverterUtils.binaryBlockToDataFrame(rddIn2, mc, sc);
+				Dataset<Row> df = FrameRDDConverterUtilsComp.binaryBlockToDataFrame(rddIn2, mc, sc);
 				
 				//Convert back DataFrame to binary block for comparison using original binary to converted DF and back to binary 
-				JavaPairRDD<LongWritable, FrameBlock> rddOut = FrameRDDConverterUtils
+				JavaPairRDD<LongWritable, FrameBlock> rddOut = FrameRDDConverterUtilsComp
 						.dataFrameToBinaryBlock(sc, df, mc, false/*, columns*/)
 						.mapToPair(new LongFrameToLongWritableFrameFunction());
 				rddOut.saveAsHadoopFile(fnameOut, LongWritable.class, FrameBlock.class, oinfo.outputFormatClass);
@@ -556,11 +557,11 @@ public class FrameConverterTest extends AutomatedTestBase
 	/* 
 	 * It will return JavaRDD<Row> based on csv data input file.
 	 */
-	JavaRDD<Row> getRowRDD(JavaSparkContext sc, String fnameIn, String separator)
+	JavaRDD<Row> getRowRDD(JavaSparkContext sc, String fnameIn, String separator, List<ValueType> schema)
 	{
 		// Load a text file and convert each line to a java rdd.
 		JavaRDD<String> dataRdd = sc.textFile(fnameIn);
-		return dataRdd.map(new RowGenerator());
+		return dataRdd.map(new RowGenerator(schema));
 	}
 	
 	/* 
@@ -569,13 +570,20 @@ public class FrameConverterTest extends AutomatedTestBase
 	private static class RowGenerator implements Function<String,Row> 
 	{
 		private static final long serialVersionUID = -6736256507697511070L;
+		
+		List<ValueType> _schema = null;
+		
+		public RowGenerator(List<ValueType> schema)
+		{
+			_schema = schema;
+		}
 
 		@Override
 		public Row call(String record) throws Exception {
 		      String[] fields = record.split(",");
 		      Object[] objects = new Object[fields.length]; 
 		      for (int i=0; i<fields.length; i++) {
-			      objects[i] = fields[i];
+			      objects[i] = UtilFunctions.stringToObject(_schema.get(i), fields[i]);
 		      }
 		      return RowFactory.create(objects);
 		}

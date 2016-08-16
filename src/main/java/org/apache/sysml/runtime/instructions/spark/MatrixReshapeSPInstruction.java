@@ -19,26 +19,18 @@
 
 package org.apache.sysml.runtime.instructions.spark;
 
-import java.util.ArrayList;
-
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
-
-import scala.Tuple2;
-
 import org.apache.sysml.parser.Expression.ValueType;
 import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
 import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.instructions.InstructionUtils;
 import org.apache.sysml.runtime.instructions.cp.CPOperand;
+import org.apache.sysml.runtime.instructions.spark.MatrixReshapeSPInstructionComp.RDDReshapeFunction;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
-import org.apache.sysml.runtime.instructions.spark.utils.SparkUtils;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
-import org.apache.sysml.runtime.matrix.data.LibMatrixReorg;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
-import org.apache.sysml.runtime.matrix.mapred.IndexedMatrixValue;
 import org.apache.sysml.runtime.matrix.operators.Operator;
 
 /**
@@ -118,37 +110,5 @@ public class MatrixReshapeSPInstruction extends UnarySPInstruction
 		//put output RDD handle into symbol table
 		sec.setRDDHandleForVariable(output.getName(), out);
 		sec.addLineageRDD(output.getName(), input1.getName());
-	}
-	
-	private static class RDDReshapeFunction implements PairFlatMapFunction<Tuple2<MatrixIndexes, MatrixBlock>, MatrixIndexes, MatrixBlock> 
-	{
-		private static final long serialVersionUID = 2819309412002224478L;
-		
-		private MatrixCharacteristics _mcIn = null;
-		private MatrixCharacteristics _mcOut = null;
-		private boolean _byrow = true;
-		
-		public RDDReshapeFunction( MatrixCharacteristics mcIn, MatrixCharacteristics mcOut, boolean byrow)
-		{
-			_mcIn = mcIn;
-			_mcOut = mcOut;
-			_byrow = byrow;
-		}
-		
-		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call( Tuple2<MatrixIndexes, MatrixBlock> arg0 ) 
-			throws Exception 
-		{
-			//input conversion (for libmatrixreorg compatibility)
-			IndexedMatrixValue in = SparkUtils.toIndexedMatrixBlock(arg0);
-			
-			//execute actual reshape operation
-			ArrayList<IndexedMatrixValue> out = new ArrayList<IndexedMatrixValue>();			
-			out = LibMatrixReorg.reshape(in, _mcIn.getRows(), _mcIn.getCols(), _mcIn.getRowsPerBlock(), _mcIn.getRowsPerBlock(),
-                    out, _mcOut.getRows(), _mcOut.getCols(), _mcOut.getRowsPerBlock(), _mcOut.getColsPerBlock(), _byrow);
-
-			//output conversion (for compatibility w/ rdd schema)
-			return SparkUtils.fromIndexedMatrixBlock(out);
-		}
 	}
 }

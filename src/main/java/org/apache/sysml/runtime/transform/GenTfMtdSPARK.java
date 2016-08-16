@@ -20,20 +20,13 @@
 package org.apache.sysml.runtime.transform;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ByteWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.wink.json4j.JSONException;
 import org.apache.wink.json4j.JSONObject;
@@ -44,6 +37,7 @@ import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.matrix.CSVReblockMR.OffsetCount;
 import org.apache.sysml.runtime.matrix.data.CSVFileFormatProperties;
 import org.apache.sysml.runtime.matrix.data.Pair;
+import org.apache.sysml.runtime.transform.GenTfMtdSPARKComp.GenTfMtdReduce;
 
 public class GenTfMtdSPARK 
 {
@@ -145,75 +139,7 @@ public class GenTfMtdSPARK
 		}
 		
 	}
-	
-	// ------------------------------------------------------------------------------------------------
-	
-	private static class GenTfMtdReduce implements FlatMapFunction<Tuple2<Integer, Iterable<DistinctValue>>, Long> 
-	{	
-		private static final long serialVersionUID = -2733233671193035242L;
-		private TfUtils _agents = null;
 		
-		public GenTfMtdReduce(boolean hasHeader, String delim, String naStrings, String headerLine, String tfMtdDir, String offsetFile, String spec, long numCols) throws IOException, JSONException {
-			String[] nas = TfUtils.parseNAStrings(naStrings); 
-			JSONObject jspec = new JSONObject(spec);
-			_agents = new TfUtils(headerLine, hasHeader, delim, nas, jspec, numCols, tfMtdDir, offsetFile, null);
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public Iterable<Long> call(Tuple2<Integer, Iterable<DistinctValue>> t)
-				throws Exception {
-			
-			int colID = t._1();
-			Iterator<DistinctValue> iterDV = t._2().iterator();
-
-			JobConf job = new JobConf();
-			FileSystem fs = FileSystem.get(job);
-			
-			ArrayList<Long> numRows = new ArrayList<Long>();
-			
-			if(colID < 0) 
-			{
-				// process mapper output for MV and Bin agents
-				colID = colID*-1;
-				_agents.getMVImputeAgent().mergeAndOutputTransformationMetadata(iterDV, _agents.getTfMtdDir(), colID, fs, _agents);
-				numRows.add(0L);
-			}
-			else if ( colID == _agents.getNumCols() + 1)
-			{
-				// process mapper output for OFFSET_FILE
-				ArrayList<OffsetCount> list = new ArrayList<OffsetCount>();
-				while(iterDV.hasNext())
-					list.add(new OffsetCount(iterDV.next().getOffsetCount()));
-				Collections.sort(list);
-				
-				@SuppressWarnings("deprecation")
-				SequenceFile.Writer writer = new SequenceFile.Writer(fs, job, new Path(_agents.getOffsetFile()+"/part-00000"), ByteWritable.class, OffsetCount.class);
-				
-				long lineOffset=0;
-				for(OffsetCount oc: list)
-				{
-					long count=oc.count;
-					oc.count=lineOffset;
-					writer.append(new ByteWritable((byte)0), oc);
-					lineOffset+=count;
-				}
-				writer.close();
-				list.clear();
-				
-				numRows.add(lineOffset);
-			}
-			else 
-			{
-				// process mapper output for Recode agent
-				_agents.getRecodeAgent().mergeAndOutputTransformationMetadata(iterDV, _agents.getTfMtdDir(), colID, fs, _agents);
-				numRows.add(0L);
-			}
-			
-			return numRows;
-		}
-	}
-	
 	/**
 	 * 
 	 * @param in

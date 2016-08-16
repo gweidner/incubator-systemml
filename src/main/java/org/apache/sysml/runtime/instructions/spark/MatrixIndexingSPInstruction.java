@@ -34,6 +34,8 @@ import org.apache.sysml.runtime.controlprogram.caching.MatrixObject.UpdateType;
 import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
 import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.instructions.cp.CPOperand;
+import org.apache.sysml.runtime.instructions.spark.MatrixIndexingSPInstructionComp.SliceBlock;
+import org.apache.sysml.runtime.instructions.spark.MatrixIndexingSPInstructionComp.SliceRHSForLeftIndexing;
 import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
 import org.apache.sysml.runtime.instructions.spark.functions.IsBlockInRange;
@@ -198,40 +200,7 @@ public class MatrixIndexingSPInstruction  extends IndexingSPInstruction
 				(ixrange.rowStart==1 && ixrange.rowEnd==mcIn.getRows() && mcIn.getCols()<=mcIn.getColsPerBlock() )   //1-1 column block indexing
 			  ||(ixrange.colStart==1 && ixrange.colEnd==mcIn.getCols() && mcIn.getRows()<=mcIn.getRowsPerBlock() )); //1-1 row block indexing
 	}
-	
-	
-	/**
-	 * 
-	 */
-	private static class SliceRHSForLeftIndexing implements PairFlatMapFunction<Tuple2<MatrixIndexes,MatrixBlock>, MatrixIndexes, MatrixBlock> 
-	{
-		private static final long serialVersionUID = 5724800998701216440L;
 		
-		private IndexRange _ixrange = null; 
-		private int _brlen = -1; 
-		private int _bclen = -1;
-		private long _rlen = -1;
-		private long _clen = -1;
-		
-		public SliceRHSForLeftIndexing(IndexRange ixrange, MatrixCharacteristics mcLeft) {
-			_ixrange = ixrange;
-			_rlen = mcLeft.getRows();
-			_clen = mcLeft.getCols();
-			_brlen = mcLeft.getRowsPerBlock();
-			_bclen = mcLeft.getColsPerBlock();
-		}
-
-		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> rightKV) 
-			throws Exception 
-		{
-			IndexedMatrixValue in = SparkUtils.toIndexedMatrixBlock(rightKV);			
-			ArrayList<IndexedMatrixValue> out = new ArrayList<IndexedMatrixValue>();
-			OperationsOnMatrixValues.performShift(in, _ixrange, _brlen, _bclen, _rlen, _clen, out);
-			return SparkUtils.fromIndexedMatrixBlock(out);
-		}		
-	}
-	
 	/**
 	 * 
 	 */
@@ -290,7 +259,7 @@ public class MatrixIndexingSPInstruction  extends IndexingSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
 			throws Exception 
 		{
 			return new LeftIndexPartitionIterator(arg0);
@@ -338,36 +307,6 @@ public class MatrixIndexingSPInstruction  extends IndexingSPInstruction
 			}
 		}
 	}
-
-	/**
-	 * 
-	 */
-	private static class SliceBlock implements PairFlatMapFunction<Tuple2<MatrixIndexes,MatrixBlock>, MatrixIndexes, MatrixBlock> 
-	{
-		private static final long serialVersionUID = 5733886476413136826L;
-		
-		private IndexRange _ixrange;
-		private int _brlen; 
-		private int _bclen;
-		
-		public SliceBlock(IndexRange ixrange, MatrixCharacteristics mcOut) {
-			_ixrange = ixrange;
-			_brlen = mcOut.getRowsPerBlock();
-			_bclen = mcOut.getColsPerBlock();
-		}
-
-		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Tuple2<MatrixIndexes, MatrixBlock> kv) 
-			throws Exception 
-		{	
-			IndexedMatrixValue in = SparkUtils.toIndexedMatrixBlock(kv);
-			
-			ArrayList<IndexedMatrixValue> outlist = new ArrayList<IndexedMatrixValue>();
-			OperationsOnMatrixValues.performSlice(in, _ixrange, _brlen, _bclen, outlist);
-			
-			return SparkUtils.fromIndexedMatrixBlock(outlist);
-		}		
-	}
 	
 	/**
 	 * 
@@ -387,7 +326,7 @@ public class MatrixIndexingSPInstruction  extends IndexingSPInstruction
 		}
 
 		@Override
-		public Iterable<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
+		public LazyIterableIterator<Tuple2<MatrixIndexes, MatrixBlock>> call(Iterator<Tuple2<MatrixIndexes, MatrixBlock>> arg0)
 			throws Exception 
 		{
 			return new SliceBlockPartitionIterator(arg0);

@@ -65,7 +65,7 @@
 	<properties>
 		<hadoop.version>2.4.1</hadoop.version>
 		<antlr.version>4.3</antlr.version>
-		<spark.version>1.4.1</spark.version>
+		<spark.version>2.0.0</spark.version> <!-- 1.4.1 prev -->
 		<scala.version>2.11.8</scala.version>
 		<scala.binary.version>2.11</scala.binary.version>
 		<scala.test.version>2.2.6</scala.test.version>
@@ -231,33 +231,33 @@
 					<target>1.6</target>
 				</configuration>
 			</plugin>
-			<plugin>
-			  <groupId>net.alchim31.maven</groupId>
-			  <artifactId>scala-maven-plugin</artifactId>
-			  <version>3.2.2</version>
-			  <executions>
-				<execution>
-				  <id>eclipse-add-source</id>
-				  <goals>
-					<goal>add-source</goal>
-				  </goals>
-				</execution>
-				<execution>
-				  <id>scala-compile-first</id>
-				  <phase>process-resources</phase>
-				  <goals>
-					<goal>compile</goal>
-				  </goals>
-				</execution>
-				<execution>
-				  <id>scala-test-compile-first</id>
-				  <phase>process-test-resources</phase>
-				  <goals>
-					<goal>testCompile</goal>
-				  </goals>
-				</execution>
-			  </executions>
-			</plugin>
+<!-- 			<plugin> -->
+<!-- 			  <groupId>net.alchim31.maven</groupId> -->
+<!-- 			  <artifactId>scala-maven-plugin</artifactId> -->
+<!-- 			  <version>3.2.2</version> -->
+<!-- 			  <executions> -->
+<!-- 				<execution> -->
+<!-- 				  <id>eclipse-add-source</id> -->
+<!-- 				  <goals> -->
+<!-- 					<goal>add-source</goal> -->
+<!-- 				  </goals> -->
+<!-- 				</execution> -->
+<!-- 				<execution> -->
+<!-- 				  <id>scala-compile-first</id> -->
+<!-- 				  <phase>process-resources</phase> -->
+<!-- 				  <goals> -->
+<!-- 					<goal>compile</goal> -->
+<!-- 				  </goals> -->
+<!-- 				</execution> -->
+<!-- 				<execution> -->
+<!-- 				  <id>scala-test-compile-first</id> -->
+<!-- 				  <phase>process-test-resources</phase> -->
+<!-- 				  <goals> -->
+<!-- 					<goal>testCompile</goal> -->
+<!-- 				  </goals> -->
+<!-- 				</execution> -->
+<!-- 			  </executions> -->
+<!-- 			</plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
@@ -492,18 +492,42 @@
 		</profile>
 
 		<profile>
-			<!-- Profile for Windows builds. Not currently needed, but might be needed
-				in the future. -->
-			<id>platform-windows</id>
+			<id>spark-2.0</id>
 			<activation>
+				<!-- <activeByDefault>true</activeByDefault> -->
+				<!-- temporarily force profile to test under jenkins -->
 				<os>
-					<family>windows</family>
+					<family>unix</family>
 				</os>
 			</activation>
 			<properties>
-				<!-- Extra JVM args for Windows go here.-->
-				<integrationTestExtraJVMArgs />
+				<spark.version>2.0.0</spark.version>
+				<scala.version>2.11.8</scala.version>
+				<scala.binary.version>2.11</scala.binary.version>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>add-compatibility-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>${basedir}/src/comp2/java</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>		
 		</profile>
 
 		<profile>
