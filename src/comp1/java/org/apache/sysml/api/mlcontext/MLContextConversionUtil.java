@@ -47,7 +47,8 @@ import org.apache.sysml.runtime.instructions.spark.functions.CopyTextInputFuncti
 import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.DataFrameAnalysisFunction;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.DataFrameToBinaryBlockFunction;
+import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExtComp;
+import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExtComp.DataFrameToBinaryBlockFunction;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.MatrixFormatMetaData;
 import org.apache.sysml.runtime.matrix.data.IJV;
@@ -688,11 +689,11 @@ public class MLContextConversionUtil {
 			SQLContext sqlContext = new SQLContext(sc);
 			DataFrame df = null;
 			if(isVectorDF) {
-				df = RDDConverterUtilsExt.binaryBlockToVectorDataFrame(binaryBlockMatrix, matrixCharacteristics,
+				df = RDDConverterUtilsExtComp.binaryBlockToVectorDataFrame(binaryBlockMatrix, matrixCharacteristics,
 						sqlContext);
 			}
 			else {
-				df = RDDConverterUtilsExt.binaryBlockToDataFrame(binaryBlockMatrix, matrixCharacteristics,
+				df = RDDConverterUtilsExtComp.binaryBlockToDataFrame(binaryBlockMatrix, matrixCharacteristics,
 					sqlContext);
 			}
 			

@@ -497,7 +497,7 @@
 				<!-- <activeByDefault>true</activeByDefault> -->
 				<!-- temporarily force profile to test under jenkins -->
 				<os>
-					<family>unix</family>
+					<!-- <family>unix</family> -->
 				</os>
 			</activation>
 			<properties>
@@ -521,6 +521,44 @@
 								<configuration>
 									<sources>
 										<source>${basedir}/src/comp2/java</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>		
+		</profile>
+
+		<profile>
+			<id>spark-1.6</id>
+			<activation>
+				<!-- temporarily force profile to test under jenkins -->
+				<os>
+					<family>unix</family>
+				</os>
+			</activation>
+			<properties>
+				<spark.version>1.6.2</spark.version>
+				<scala.version>2.10.5</scala.version>
+				<scala.binary.version>2.10</scala.binary.version>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<id>add-compatibility-source</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>add-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>${basedir}/src/comp1/java</source>
 									</sources>
 								</configuration>
 							</execution>

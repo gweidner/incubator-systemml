@@ -22,29 +22,16 @@ package org.apache.sysml.runtime.instructions.spark;
 
 import java.util.ArrayList;
 
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
 import scala.Tuple2;
 
 import org.apache.sysml.hops.OptimizerUtils;
 import org.apache.sysml.lops.MapMult.CacheType;
-import org.apache.sysml.lops.PMMJ;
 import org.apache.sysml.runtime.DMLRuntimeException;
-import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
-import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
-import org.apache.sysml.runtime.functionobjects.Multiply;
-import org.apache.sysml.runtime.functionobjects.Plus;
-import org.apache.sysml.runtime.instructions.InstructionUtils;
-import org.apache.sysml.runtime.instructions.cp.CPOperand;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
-import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
-import org.apache.sysml.runtime.matrix.operators.AggregateBinaryOperator;
-import org.apache.sysml.runtime.matrix.operators.AggregateOperator;
-import org.apache.sysml.runtime.matrix.operators.Operator;
 import org.apache.sysml.runtime.util.UtilFunctions;
 
 /**

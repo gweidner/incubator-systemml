@@ -19,52 +19,13 @@
 
 package org.apache.sysml.runtime.instructions.spark;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.math3.distribution.PoissonDistribution;
-import org.apache.commons.math3.random.Well1024a;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.util.random.SamplingUtils;
 
-import scala.Tuple2;
-
-import org.apache.sysml.api.DMLScript;
-import org.apache.sysml.api.DMLScript.RUNTIME_PLATFORM;
-import org.apache.sysml.conf.ConfigurationManager;
-import org.apache.sysml.hops.DataGenOp;
-import org.apache.sysml.hops.Hop.DataGenMethod;
-import org.apache.sysml.hops.OptimizerUtils;
-import org.apache.sysml.lops.DataGen;
-import org.apache.sysml.lops.Lop;
-import org.apache.sysml.runtime.DMLRuntimeException;
-import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
-import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
-import org.apache.sysml.runtime.controlprogram.parfor.stat.InfrastructureAnalyzer;
-import org.apache.sysml.runtime.instructions.InstructionUtils;
-import org.apache.sysml.runtime.instructions.cp.CPOperand;
 import org.apache.sysml.runtime.instructions.spark.RandSPInstruction.SampleTask;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtils;
-import org.apache.sysml.runtime.io.IOUtilFunctions;
-import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
-import org.apache.sysml.runtime.matrix.data.LibMatrixDatagen;
-import org.apache.sysml.runtime.matrix.data.MatrixBlock;
-import org.apache.sysml.runtime.matrix.data.MatrixCell;
-import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
-import org.apache.sysml.runtime.matrix.data.RandomMatrixGenerator;
-import org.apache.sysml.runtime.matrix.operators.Operator;
-import org.apache.sysml.runtime.util.UtilFunctions;
-import org.apache.sysml.utils.Statistics;
 
 public class RandSPInstructionComp
 {

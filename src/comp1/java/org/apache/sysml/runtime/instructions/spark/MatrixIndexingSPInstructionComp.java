@@ -20,40 +20,24 @@
 package org.apache.sysml.runtime.instructions.spark;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-
 import scala.Tuple2;
 
-import org.apache.sysml.hops.AggBinaryOp.SparkAggType;
-import org.apache.sysml.runtime.DMLRuntimeException;
-import org.apache.sysml.runtime.controlprogram.caching.MatrixObject.UpdateType;
-import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
-import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
-import org.apache.sysml.runtime.instructions.cp.CPOperand;
-import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
-import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
-import org.apache.sysml.runtime.instructions.spark.functions.IsBlockInRange;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.SparkUtils;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
 import org.apache.sysml.runtime.matrix.data.OperationsOnMatrixValues;
 import org.apache.sysml.runtime.matrix.mapred.IndexedMatrixValue;
-import org.apache.sysml.runtime.matrix.operators.Operator;
 import org.apache.sysml.runtime.util.IndexRange;
-import org.apache.sysml.runtime.util.UtilFunctions;
 
 public class MatrixIndexingSPInstructionComp
 {	
 	/**
 	 * 
 	 */
-	private static class SliceRHSForLeftIndexing implements PairFlatMapFunction<Tuple2<MatrixIndexes,MatrixBlock>, MatrixIndexes, MatrixBlock> 
+	/*private*/ static class SliceRHSForLeftIndexing implements PairFlatMapFunction<Tuple2<MatrixIndexes,MatrixBlock>, MatrixIndexes, MatrixBlock> 
 	{
 		private static final long serialVersionUID = 5724800998701216440L;
 		
@@ -85,7 +69,7 @@ public class MatrixIndexingSPInstructionComp
 	/**
 	 * 
 	 */
-	private static class SliceBlock implements PairFlatMapFunction<Tuple2<MatrixIndexes,MatrixBlock>, MatrixIndexes, MatrixBlock> 
+	/*private*/ static class SliceBlock implements PairFlatMapFunction<Tuple2<MatrixIndexes,MatrixBlock>, MatrixIndexes, MatrixBlock> 
 	{
 		private static final long serialVersionUID = 5733886476413136826L;
 		

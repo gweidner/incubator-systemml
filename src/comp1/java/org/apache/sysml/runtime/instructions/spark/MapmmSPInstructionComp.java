@@ -21,35 +21,19 @@ package org.apache.sysml.runtime.instructions.spark;
 
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
-import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-
 import scala.Tuple2;
 
-import org.apache.sysml.hops.AggBinaryOp.SparkAggType;
-import org.apache.sysml.lops.MapMult;
 import org.apache.sysml.lops.MapMult.CacheType;
-import org.apache.sysml.runtime.DMLRuntimeException;
-import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
-import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.functionobjects.Multiply;
 import org.apache.sysml.runtime.functionobjects.Plus;
-import org.apache.sysml.runtime.instructions.InstructionUtils;
-import org.apache.sysml.runtime.instructions.cp.CPOperand;
-import org.apache.sysml.runtime.instructions.spark.data.LazyIterableIterator;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
-import org.apache.sysml.runtime.instructions.spark.functions.FilterNonEmptyBlocksFunction;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
-import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
 import org.apache.sysml.runtime.matrix.data.OperationsOnMatrixValues;
 import org.apache.sysml.runtime.matrix.operators.AggregateBinaryOperator;
 import org.apache.sysml.runtime.matrix.operators.AggregateOperator;
-import org.apache.sysml.runtime.matrix.operators.Operator;
 
 /**
  * TODO: we need to reason about multiple broadcast variables for chains of mapmults (sum of operations until cleanup) 

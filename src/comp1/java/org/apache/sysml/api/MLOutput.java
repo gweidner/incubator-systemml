@@ -42,6 +42,7 @@ import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.instructions.spark.functions.GetMLBlock;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt;
+import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExtComp;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
@@ -100,7 +101,7 @@ public class MLOutput {
 		JavaPairRDD<MatrixIndexes,MatrixBlock> rdd = getBinaryBlockedRDD(varName);
 		if(rdd != null) {
 			MatrixCharacteristics mc = _outMetadata.get(varName);
-			return RDDConverterUtilsExt.binaryBlockToDataFrame(rdd, mc, sqlContext);
+			return RDDConverterUtilsExtComp.binaryBlockToDataFrame(rdd, mc, sqlContext);
 		}
 		throw new DMLRuntimeException("Variable " + varName + " not found in the output symbol table.");
 	}
@@ -121,7 +122,7 @@ public class MLOutput {
 			JavaPairRDD<MatrixIndexes,MatrixBlock> rdd = getBinaryBlockedRDD(varName);
 			if(rdd != null) {
 				MatrixCharacteristics mc = _outMetadata.get(varName);
-				return RDDConverterUtilsExt.binaryBlockToVectorDataFrame(rdd, mc, sqlContext);
+				return RDDConverterUtilsExtComp.binaryBlockToVectorDataFrame(rdd, mc, sqlContext);
 			}
 			throw new DMLRuntimeException("Variable " + varName + " not found in the output symbol table.");
 		}
@@ -207,7 +208,7 @@ public class MLOutput {
 		JavaPairRDD<MatrixIndexes,MatrixBlock> rdd = getBinaryBlockedRDD(varName);
 		if(rdd != null) {
 			MatrixCharacteristics mc = getMatrixCharacteristics(varName);
-			StructType schema = MLBlock.getDefaultSchemaForBinaryBlock();
+			StructType schema = MLBlockComp.getDefaultSchemaForBinaryBlock();
 			return new MLMatrix(sqlContext.createDataFrame(rdd.map(new GetMLBlock()).rdd(), schema), mc, ml);
 		}
 		throw new DMLRuntimeException("Variable " + varName + " not found in the output symbol table.");

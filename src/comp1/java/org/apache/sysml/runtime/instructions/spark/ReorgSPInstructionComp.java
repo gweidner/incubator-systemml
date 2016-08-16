@@ -21,35 +21,18 @@ package org.apache.sysml.runtime.instructions.spark;
 
 import java.util.ArrayList;
 
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 
 import scala.Tuple2;
 
-import org.apache.sysml.parser.Expression.DataType;
-import org.apache.sysml.parser.Expression.ValueType;
 import org.apache.sysml.runtime.DMLRuntimeException;
-import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
-import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
 import org.apache.sysml.runtime.functionobjects.DiagIndex;
-import org.apache.sysml.runtime.functionobjects.RevIndex;
-import org.apache.sysml.runtime.functionobjects.SortIndex;
-import org.apache.sysml.runtime.functionobjects.SwapIndex;
-import org.apache.sysml.runtime.instructions.InstructionUtils;
-import org.apache.sysml.runtime.instructions.cp.CPOperand;
-import org.apache.sysml.runtime.instructions.spark.functions.FilterDiagBlocksFunction;
-import org.apache.sysml.runtime.instructions.spark.functions.IsBlockInRange;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDSortUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.SparkUtils;
-import org.apache.sysml.runtime.instructions.spark.functions.ReorgMapFunction;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.data.LibMatrixReorg;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
 import org.apache.sysml.runtime.matrix.mapred.IndexedMatrixValue;
-import org.apache.sysml.runtime.matrix.operators.Operator;
 import org.apache.sysml.runtime.matrix.operators.ReorgOperator;
 import org.apache.sysml.runtime.util.UtilFunctions;
 
@@ -133,4 +116,3 @@ public class ReorgSPInstructionComp
 		}
 	}
 }
-

@@ -18,21 +18,9 @@
  */
 package org.apache.sysml.api;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.spark.sql.Row;
 import org.apache.spark.sql.types.DataType;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-
-import org.apache.sysml.runtime.matrix.data.MatrixBlock;
-import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
-
-import scala.collection.Seq;
 
 public class MLBlockComp {
 

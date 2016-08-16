@@ -56,6 +56,8 @@ import org.apache.sysml.api.MLOutput.ConvertDoubleArrayToRows;
 import org.apache.sysml.api.MLOutput.ProjectRows;
 import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.instructions.spark.functions.ConvertMatrixBlockToIJVLines;
+import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.AddRowID;
+import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.DataFrameAnalysisFunction;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.IJVToBinaryBlockFunctionHelper;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.RDDConverterTypes;
 import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt.RowToBinaryBlockFunctionHelper;

@@ -109,7 +109,7 @@ public class MLMatrix extends DataFrame {
 	// ------------------------------------------------------------------------------------------------
 	static MLMatrix createMLMatrix(MLContext ml, SQLContext sqlContext, JavaPairRDD<MatrixIndexes, MatrixBlock> blocks, MatrixCharacteristics mc) throws DMLRuntimeException {
 		RDD<Row> rows = blocks.map(new GetMLBlock()).rdd();
-		StructType schema = MLBlock.getDefaultSchemaForBinaryBlock();
+		StructType schema = MLBlockComp.getDefaultSchemaForBinaryBlock();
 		return new MLMatrix(sqlContext.createDataFrame(rows.toJavaRDD(), schema), mc, ml);
 	}
 	
@@ -230,7 +230,7 @@ public class MLMatrix extends DataFrame {
 		ml.registerOutput("output");
 		MLOutput out = ml.executeScript(getScript(op));
 		RDD<Row> rows = out.getBinaryBlockedRDD("output").map(new GetMLBlock()).rdd();
-		StructType schema = MLBlock.getDefaultSchemaForBinaryBlock();
+		StructType schema = MLBlockComp.getDefaultSchemaForBinaryBlock();
 		MatrixCharacteristics mcOut = out.getMatrixCharacteristics("output");
 		return new MLMatrix(this.sqlContext().createDataFrame(rows.toJavaRDD(), schema), mcOut, ml);
 	}
@@ -241,7 +241,7 @@ public class MLMatrix extends DataFrame {
 		ml.registerOutput("output");
 		MLOutput out = ml.executeScript(getScalarBinaryScript(op, scalar, isScalarLeft));
 		RDD<Row> rows = out.getBinaryBlockedRDD("output").map(new GetMLBlock()).rdd();
-		StructType schema = MLBlock.getDefaultSchemaForBinaryBlock();
+		StructType schema = MLBlockComp.getDefaultSchemaForBinaryBlock();
 		MatrixCharacteristics mcOut = out.getMatrixCharacteristics("output");
 		return new MLMatrix(this.sqlContext().createDataFrame(rows.toJavaRDD(), schema), mcOut, ml);
 	}
@@ -346,7 +346,7 @@ public class MLMatrix extends DataFrame {
 				+ writeStmt;
 		MLOutput out = ml.executeScript(script);
 		RDD<Row> rows = out.getBinaryBlockedRDD("output").map(new GetMLBlock()).rdd();
-		StructType schema = MLBlock.getDefaultSchemaForBinaryBlock();
+		StructType schema = MLBlockComp.getDefaultSchemaForBinaryBlock();
 		MatrixCharacteristics mcOut = out.getMatrixCharacteristics("output");
 		return new MLMatrix(this.sqlContext().createDataFrame(rows.toJavaRDD(), schema), mcOut, ml);
 	}

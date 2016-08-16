@@ -20,68 +20,18 @@
 package org.apache.sysml.runtime.instructions.spark;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
-import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.broadcast.Broadcast;
-
 import scala.Tuple2;
 
-import org.apache.sysml.lops.Lop;
-import org.apache.sysml.lops.PartialAggregate.CorrectionLocationType;
-import org.apache.sysml.parser.Expression.ValueType;
-import org.apache.sysml.parser.Statement;
-import org.apache.sysml.runtime.DMLRuntimeException;
-import org.apache.sysml.runtime.controlprogram.caching.FrameObject;
-import org.apache.sysml.runtime.controlprogram.caching.MatrixObject;
-import org.apache.sysml.runtime.controlprogram.caching.MatrixObject.UpdateType;
-import org.apache.sysml.runtime.controlprogram.context.ExecutionContext;
-import org.apache.sysml.runtime.controlprogram.context.SparkExecutionContext;
-import org.apache.sysml.runtime.functionobjects.KahanPlus;
-import org.apache.sysml.runtime.functionobjects.ParameterizedBuiltin;
-import org.apache.sysml.runtime.functionobjects.ValueFunction;
-import org.apache.sysml.runtime.instructions.InstructionUtils;
-import org.apache.sysml.runtime.instructions.cp.CPOperand;
-import org.apache.sysml.runtime.instructions.mr.GroupedAggregateInstruction;
 import org.apache.sysml.runtime.instructions.spark.data.PartitionedBroadcast;
-import org.apache.sysml.runtime.instructions.spark.functions.ExtractGroup.ExtractGroupBroadcast;
-import org.apache.sysml.runtime.instructions.spark.functions.ExtractGroup.ExtractGroupJoin;
-import org.apache.sysml.runtime.instructions.spark.functions.ExtractGroupNWeights;
-import org.apache.sysml.runtime.instructions.spark.functions.PerformGroupByAggInCombiner;
-import org.apache.sysml.runtime.instructions.spark.functions.PerformGroupByAggInReducer;
-import org.apache.sysml.runtime.instructions.spark.functions.ReplicateVectorFunction;
-import org.apache.sysml.runtime.instructions.spark.utils.FrameRDDConverterUtils;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDAggregateUtils;
 import org.apache.sysml.runtime.instructions.spark.utils.SparkUtils;
-import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
-import org.apache.sysml.runtime.matrix.data.FrameBlock;
-import org.apache.sysml.runtime.matrix.data.InputInfo;
 import org.apache.sysml.runtime.matrix.data.LibMatrixReorg;
 import org.apache.sysml.runtime.matrix.data.MatrixBlock;
-import org.apache.sysml.runtime.matrix.data.MatrixCell;
 import org.apache.sysml.runtime.matrix.data.MatrixIndexes;
 import org.apache.sysml.runtime.matrix.data.OperationsOnMatrixValues;
-import org.apache.sysml.runtime.matrix.data.WeightedCell;
 import org.apache.sysml.runtime.matrix.mapred.IndexedMatrixValue;
-import org.apache.sysml.runtime.matrix.operators.AggregateOperator;
-import org.apache.sysml.runtime.matrix.operators.CMOperator;
-import org.apache.sysml.runtime.matrix.operators.CMOperator.AggregateOperationTypes;
 import org.apache.sysml.runtime.matrix.operators.Operator;
-import org.apache.sysml.runtime.matrix.operators.SimpleOperator;
-import org.apache.sysml.runtime.transform.DataTransform;
-import org.apache.sysml.runtime.transform.TfUtils;
-import org.apache.sysml.runtime.transform.decode.Decoder;
-import org.apache.sysml.runtime.transform.decode.DecoderFactory;
-import org.apache.sysml.runtime.transform.encode.Encoder;
-import org.apache.sysml.runtime.transform.encode.EncoderFactory;
-import org.apache.sysml.runtime.transform.meta.TfMetaUtils;
-import org.apache.sysml.runtime.transform.meta.TfOffsetMap;
-import org.apache.sysml.runtime.util.DataConverter;
-import org.apache.sysml.runtime.util.UtilFunctions;
 
 
 public class ParameterizedBuiltinSPInstructionComp

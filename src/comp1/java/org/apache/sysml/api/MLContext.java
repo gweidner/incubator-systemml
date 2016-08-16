@@ -73,7 +73,7 @@ import org.apache.sysml.runtime.instructions.spark.functions.ConvertStringToLong
 import org.apache.sysml.runtime.instructions.spark.functions.CopyBlockPairFunction;
 import org.apache.sysml.runtime.instructions.spark.functions.CopyTextInputFunction;
 import org.apache.sysml.runtime.instructions.spark.functions.SparkListener;
-import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExt;
+import org.apache.sysml.runtime.instructions.spark.utils.RDDConverterUtilsExtComp;
 import org.apache.sysml.runtime.matrix.MatrixCharacteristics;
 import org.apache.sysml.runtime.matrix.MatrixFormatMetaData;
 import org.apache.sysml.runtime.matrix.data.CSVFileFormatProperties;
@@ -274,7 +274,7 @@ public class MLContext {
 	 */
 	public void registerInput(String varName, DataFrame df, boolean containsID) throws DMLRuntimeException {
 		MatrixCharacteristics mcOut = new MatrixCharacteristics();
-		JavaPairRDD<MatrixIndexes, MatrixBlock> rdd = RDDConverterUtilsExt.dataFrameToBinaryBlock(new JavaSparkContext(_sc), df, mcOut, containsID);
+		JavaPairRDD<MatrixIndexes, MatrixBlock> rdd = RDDConverterUtilsExtComp.dataFrameToBinaryBlock(new JavaSparkContext(_sc), df, mcOut, containsID);
 		registerInput(varName, rdd, mcOut);
 	}
 	
