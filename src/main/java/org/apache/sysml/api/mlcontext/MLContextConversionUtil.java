@@ -34,7 +34,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
 import org.apache.sysml.api.MLContextProxy;
@@ -245,7 +245,7 @@ public class MLContextConversionUtil {
 	 * @return the {@code DataFrame} matrix converted to a converted to a
 	 *         {@code MatrixObject}
 	 */
-	public static MatrixObject dataFrameToMatrixObject(String variableName, DataFrame dataFrame) {
+	public static MatrixObject dataFrameToMatrixObject(String variableName, Dataset<Row> dataFrame) {
 		return dataFrameToMatrixObject(variableName, dataFrame, null);
 	}
 
@@ -261,7 +261,7 @@ public class MLContextConversionUtil {
 	 * @return the {@code DataFrame} matrix converted to a converted to a
 	 *         {@code MatrixObject}
 	 */
-	public static MatrixObject dataFrameToMatrixObject(String variableName, DataFrame dataFrame,
+	public static MatrixObject dataFrameToMatrixObject(String variableName, Dataset<Row> dataFrame,
 			MatrixMetadata matrixMetadata) {
 		if (matrixMetadata == null) {
 			matrixMetadata = new MatrixMetadata();
@@ -283,7 +283,7 @@ public class MLContextConversionUtil {
 	 *         {@code JavaPairRDD<MatrixIndexes,
 	 *         MatrixBlock>} binary-block matrix
 	 */
-	public static JavaPairRDD<MatrixIndexes, MatrixBlock> dataFrameToBinaryBlocks(DataFrame dataFrame) {
+	public static JavaPairRDD<MatrixIndexes, MatrixBlock> dataFrameToBinaryBlocks(Dataset<Row> dataFrame) {
 		return dataFrameToBinaryBlocks(dataFrame, null);
 	}
 
@@ -299,7 +299,7 @@ public class MLContextConversionUtil {
 	 *         {@code JavaPairRDD<MatrixIndexes,
 	 *         MatrixBlock>} binary-block matrix
 	 */
-	public static JavaPairRDD<MatrixIndexes, MatrixBlock> dataFrameToBinaryBlocks(DataFrame dataFrame,
+	public static JavaPairRDD<MatrixIndexes, MatrixBlock> dataFrameToBinaryBlocks(Dataset<Row> dataFrame,
 			MatrixMetadata matrixMetadata) {
 
 		MatrixCharacteristics matrixCharacteristics;
@@ -335,7 +335,7 @@ public class MLContextConversionUtil {
 	 * @param matrixCharacteristics
 	 *            the matrix metadata
 	 */
-	public static void determineDataFrameDimensionsIfNeeded(DataFrame dataFrame,
+	public static void determineDataFrameDimensionsIfNeeded(Dataset<Row> dataFrame,
 			MatrixCharacteristics matrixCharacteristics) {
 		if (!matrixCharacteristics.dimsKnown(true)) {
 			// only available to the new MLContext API, not the old API
@@ -743,7 +743,7 @@ public class MLContextConversionUtil {
 	 *            the Spark execution context
 	 * @return the {@code MatrixObject} converted to a {@code DataFrame}
 	 */
-	public static DataFrame matrixObjectToDataFrame(MatrixObject matrixObject,
+	public static Dataset<Row> matrixObjectToDataFrame(MatrixObject matrixObject,
 			SparkExecutionContext sparkExecutionContext, boolean isVectorDF) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -754,7 +754,7 @@ public class MLContextConversionUtil {
 			MLContext activeMLContext = (MLContext) MLContextProxy.getActiveMLContext();
 			SparkContext sc = activeMLContext.getSparkContext();
 			SQLContext sqlContext = new SQLContext(sc);
-			DataFrame df = null;
+			Dataset<Row> df = null;
 			if (isVectorDF) {
 				df = RDDConverterUtilsExt.binaryBlockToVectorDataFrame(binaryBlockMatrix, matrixCharacteristics,
 						sqlContext);

@@ -23,7 +23,8 @@ import java.util.Set;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.sysml.runtime.DMLRuntimeException;
 import org.apache.sysml.runtime.controlprogram.LocalVariableMap;
 import org.apache.sysml.runtime.controlprogram.caching.CacheException;
@@ -253,15 +254,15 @@ public class MLResults {
 	 *            the name of the output
 	 * @return the output as a {@code DataFrame} of doubles
 	 */
-	public DataFrame getDataFrame(String outputName) {
+	public Dataset<Row> getDataFrame(String outputName) {
 		MatrixObject mo = getMatrixObject(outputName);
-		DataFrame df = MLContextConversionUtil.matrixObjectToDataFrame(mo, sparkExecutionContext, false);
+		Dataset<Row> df = MLContextConversionUtil.matrixObjectToDataFrame(mo, sparkExecutionContext, false);
 		return df;
 	}
 	
-	public DataFrame getDataFrame(String outputName, boolean isVectorDF) {
+	public Dataset<Row> getDataFrame(String outputName, boolean isVectorDF) {
 		MatrixObject mo = getMatrixObject(outputName);
-		DataFrame df = MLContextConversionUtil.matrixObjectToDataFrame(mo, sparkExecutionContext, isVectorDF);
+		Dataset<Row> df = MLContextConversionUtil.matrixObjectToDataFrame(mo, sparkExecutionContext, isVectorDF);
 		return df;
 	}
 

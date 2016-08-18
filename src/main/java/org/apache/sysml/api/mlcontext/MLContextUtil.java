@@ -39,7 +39,8 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.sysml.conf.CompilerConfig;
 import org.apache.sysml.conf.CompilerConfig.ConfigType;
 import org.apache.sysml.conf.ConfigurationManager;
@@ -72,7 +73,7 @@ public final class MLContextUtil {
 	 * Complex data types supported by the MLContext API
 	 */
 	@SuppressWarnings("rawtypes")
-	public static final Class[] COMPLEX_DATA_TYPES = { JavaRDD.class, RDD.class, DataFrame.class,
+	public static final Class[] COMPLEX_DATA_TYPES = { JavaRDD.class, RDD.class, Dataset.class,
 			BinaryBlockMatrix.class, Matrix.class, (new double[][] {}).getClass(), MatrixBlock.class, URL.class };
 
 	/**
@@ -456,8 +457,9 @@ public final class MLContextUtil {
 			MatrixObject matrixObject = MLContextConversionUtil.matrixBlockToMatrixObject(name, matrixBlock,
 					matrixMetadata);
 			return matrixObject;
-		} else if (value instanceof DataFrame) {
-			DataFrame dataFrame = (DataFrame) value;
+		} else if (value instanceof Dataset<?>) {
+			@SuppressWarnings("unchecked")
+			Dataset<Row> dataFrame = (Dataset<Row>) value;
 			MatrixObject matrixObject = MLContextConversionUtil
 					.dataFrameToMatrixObject(name, dataFrame, matrixMetadata);
 			return matrixObject;
