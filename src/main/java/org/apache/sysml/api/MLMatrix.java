@@ -25,10 +25,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.rdd.RDD;
-import org.apache.spark.sql.DataFrame;
+import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SQLContext;
-import org.apache.spark.sql.SQLContext.QueryExecution;
+import org.apache.spark.sql.execution.QueryExecution;
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan;
 import org.apache.spark.sql.types.StructType;
 import org.apache.sysml.hops.OptimizerUtils;
@@ -64,7 +64,7 @@ import scala.Tuple2;
  result.write("Result_small.mtx", "text")
  
  */
-public class MLMatrix extends DataFrame {
+public class MLMatrix extends Dataset<Row> {
 	private static final long serialVersionUID = -7005940673916671165L;
 	protected static final Log LOG = LogFactory.getLog(DMLScript.class.getName());
 	
@@ -83,7 +83,7 @@ public class MLMatrix extends DataFrame {
 	
 	// Only used internally to set a new MLMatrix after one of matrix operations.
 	// Not to be used externally.
-	protected MLMatrix(DataFrame df, MatrixCharacteristics mc, MLContext ml) throws DMLRuntimeException {
+	protected MLMatrix(Dataset<Row> df, MatrixCharacteristics mc, MLContext ml) throws DMLRuntimeException {
 		super(df.sqlContext(), df.logicalPlan());
 		this.mc = mc;
 		this.ml = ml;
