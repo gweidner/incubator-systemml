@@ -33,7 +33,7 @@ import org.junit.runners.Suite;
 	LeftIndexingUpdateInPlaceTest.class,
 	RightIndexingMatrixTest.class,
 	RightIndexingVectorTest.class,
-	
+	PyDMLImplicitSlicingBounds.class,
 	Jdk7IssueRightIndexingTest.class,
 	UnboundedScalarRightIndexingTest.class,
 })
